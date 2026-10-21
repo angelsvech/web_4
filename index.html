@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#137a3a">
+  <title>Ячейка — камера хранения на вокзале</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Ячейка — на главную">
+      <span class="brand-mark" aria-hidden="true">Я</span>
+      <span><strong>ячейка</strong><small>камера хранения</small></span>
+    </a>
+    <div class="station-pill"><span class="live-dot"></span> Вокзал «Центральный» <span class="pill-divider">•</span> <span>Зал ожидания, этаж 1</span></div>
+    <button class="my-bookings-button" id="openBookings" type="button"><span aria-hidden="true">▤</span> Мои брони <b id="bookingCount">0</b></button>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="eyebrow-star">✳</span> ЛЕГЧЕ, ЧЕМ НЕСТИ</p>
+        <h1>Оставь вещи.<br><span>Лови момент.</span></h1>
+        <p class="hero-description">Выбери свободный шкафчик на схеме, укажи время — и гуляй налегке. Всё просто, быстро и рядом с поездом.</p>
+        <div class="hero-perks">
+          <span><i>✓</i> Без очереди</span><span><i>✓</i> Цена заранее</span><span><i>✓</i> Отмена в один клик</span>
+        </div>
+      </div>
+      <div class="hero-art"><img src="assets/locker-hero.png" alt="Игрушечные шкафчики для хранения багажа с наклейками"></div>
+      <div class="hero-sticker" aria-hidden="true">TAKE<br>IT EASY <span>☺</span></div>
+    </section>
+
+    <section class="workspace" aria-label="Выбор шкафчика">
+      <div class="section-heading">
+        <div><p class="eyebrow">ТВОЙ МАРШРУТ К СВОБОДЕ</p><h2>Найди свою ячейку</h2></div>
+        <div class="availability-summary"><span class="live-dot"></span><strong id="availableCount">10</strong> свободно из 12</div>
+      </div>
+
+      <div class="filters">
+        <label class="filter-field"><span>Размер</span>
+          <select id="sizeFilter">
+            <option value="all">Все размеры</option><option value="S">S · Рюкзак</option><option value="M">M · Чемодан</option><option value="L">L · Большой багаж</option>
+          </select>
+        </label>
+        <label class="filter-field price-filter"><span>Цена за час до <b id="priceValue">100 ₽</b></span>
+          <input id="priceFilter" type="range" min="30" max="100" step="10" value="100">
+          <span class="range-labels"><small>30 ₽</small><small>100 ₽</small></span>
+        </label>
+        <button class="reset-button" id="resetFilters" type="button">↺ Сбросить</button>
+      </div>
+
+      <div class="legend" aria-label="Обозначения"><span><i class="legend-dot free"></i> Свободен</span><span><i class="legend-dot selected"></i> Выбран</span><span><i class="legend-dot occupied"></i> Занят</span></div>
+
+      <div class="booking-layout">
+        <section class="map-panel">
+          <div class="panel-topline"><div><span class="mini-icon">⌖</span><strong>Схема камеры хранения</strong></div><span class="map-note">Вход со стороны платформ</span></div>
+          <div class="locker-map" id="lockerMap" aria-label="Интерактивная схема шкафчиков">
+            <div class="map-sign"><span>КАМЕРА ХРАНЕНИЯ</span><b>→</b></div>
+            <div class="map-row" id="mapRowA"></div><div class="map-row" id="mapRowB"></div>
+            <div class="map-floor"><span>ЗАЛ ОЖИДАНИЯ</span><span>ПЛАТФОРМЫ →</span></div>
+          </div>
+          <div class="map-foot"><span>✳ Нажми на шкафчик, чтобы выбрать</span><span>12 ячеек на плане</span></div>
+        </section>
+
+        <aside class="details-panel" aria-live="polite">
+          <div class="details-header"><span class="detail-icon">✳</span><div><p class="eyebrow">ТВОЯ ЯЧЕЙКА</p><h3 id="detailTitle">Выбери шкафчик</h3></div></div>
+          <div id="emptyState" class="empty-state"><div class="empty-illustration">⌁</div><p>Твоя лёгкость начинается здесь.</p><span>Выбери свободную ячейку на схеме или в списке ниже.</span></div>
+          <form id="bookingForm" hidden novalidate>
+            <div class="selected-locker-card"><div class="locker-mini" id="detailLockerIcon">S</div><div><strong id="detailName">Ячейка A1</strong><span id="detailSize">S · Рюкзак</span></div><div class="hour-price"><b id="detailPrice">30 ₽</b><small>/ час</small></div></div>
+            <p class="field-label">На сколько оставить?</p>
+            <div class="duration-control"><button type="button" id="minusHours" aria-label="Уменьшить часы">−</button><div><strong id="hoursDisplay">3 часа</strong><span>от 1 до 24 часов</span></div><button type="button" id="plusHours" aria-label="Увеличить часы">+</button></div>
+            <input type="hidden" id="hoursInput" value="3">
+            <label class="field-label" for="guestName">Как к тебе обращаться?</label>
+            <input class="text-input" id="guestName" maxlength="40" placeholder="Например, Аня" autocomplete="name" required>
+            <div class="price-breakdown"><span><span id="priceMath">30 ₽ × 3 часа</span></span><strong id="totalPrice">90 ₽</strong></div>
+            <p class="form-error" id="formError" role="alert"></p>
+            <button class="primary-button" id="confirmBooking" type="submit">Забронировать <span>↗</span></button>
+            <p class="safe-note">♡ Учебное демо — оплата не требуется</p>
+          </form>
+          <div class="occupied-state" id="occupiedState" hidden><div class="occupied-badge">Уже занято</div><p>Эта ячейка сейчас занята. Выбери любую свободную — они ждут тебя!</p><button class="secondary-button" id="chooseAnother" type="button">Выбрать другую</button></div>
+        </aside>
+      </div>
+
+      <section class="list-section">
+        <div class="list-heading"><div><p class="eyebrow">ВЫБИРАЙ КАК УДОБНО</p><h3>Все шкафчики</h3></div><span id="listResultText">12 ячеек</span></div>
+        <div class="locker-list" id="lockerList"></div>
+        <p class="no-results" id="noResults" hidden>По этим фильтрам ничего не нашлось. Попробуй изменить параметры.</p>
+      </section>
+
+      <section class="how-it-works">
+        <div><span class="step-number">01</span><h3>Выбери</h3><p>Найди свободный шкафчик на схеме.</p></div>
+        <div><span class="step-number">02</span><h3>Рассчитай</h3><p>Укажи время и сразу увидишь цену.</p></div>
+        <div><span class="step-number">03</span><h3>Гуляй!</h3><p>Подтверди бронь и наслаждайся поездкой.</p></div>
+      </section>
+      <p class="demo-disclaimer">Учебное демо: бронирования сохраняются только в этом браузере. Реальная камера хранения и оплата не подключены.</p>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="modal-backdrop" id="bookingsModal" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-heading"><div><p class="eyebrow">ВСЁ ПОД КОНТРОЛЕМ</p><h2 id="modalTitle">Мои брони <span id="modalCount">0</span></h2></div><button class="icon-button" id="closeBookings" type="button" aria-label="Закрыть мои брони">×</button></div>
+      <div id="myBookingsList" class="my-bookings-list"></div>
+      <p id="noBookings" class="empty-bookings">Пока пусто — самое время отправиться налегке ✳</p>
+      <div class="modal-bottom"><button class="secondary-button" id="closeBookingsBottom" type="button">Продолжить выбор</button><button class="text-button" id="resetDemo" type="button">Сбросить демо</button></div>
+    </section>
+  </div>
+  <footer><a class="brand footer-brand" href="#"><span class="brand-mark">Я</span><span><strong>ячейка</strong><small>оставь вещи, забери впечатления</small></span></a><span>Сделано для путешествий и лёгких дней <b>✳</b></span></footer>
+</body>
+</html>
